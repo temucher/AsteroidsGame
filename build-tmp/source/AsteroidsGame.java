@@ -1,3 +1,19 @@
+import processing.core.*; 
+import processing.data.*; 
+import processing.event.*; 
+import processing.opengl.*; 
+
+import java.util.HashMap; 
+import java.util.ArrayList; 
+import java.io.File; 
+import java.io.BufferedReader; 
+import java.io.PrintWriter; 
+import java.io.InputStream; 
+import java.io.OutputStream; 
+import java.io.IOException; 
+
+public class AsteroidsGame extends PApplet {
+
 //your variable declarations here
 SpaceShip xWing = new SpaceShip();
 Star[] galaxy = new Star[200];
@@ -18,10 +34,10 @@ public void draw()
     galaxy[i].show();
   }
   xWing.show();
-  if(wIsPressed == true) {xWing.accelerate(.2);}
+  if(wIsPressed == true) {xWing.accelerate(.2f);}
   if(aIsPressed == true) {xWing.rotate(-6);}
   if(dIsPressed == true) {xWing.rotate(6);}
-  if(sIsPressed == true) {xWing.accelerate(-.2);}
+  if(sIsPressed == true) {xWing.accelerate(-.2f);}
   xWing.move();
 }
 public void keyPressed()
@@ -166,5 +182,14 @@ class Star
     fill(255);
     noStroke();
     ellipse(starX, starY, 2, 2);
+  }
+}
+  static public void main(String[] passedArgs) {
+    String[] appletArgs = new String[] { "AsteroidsGame" };
+    if (passedArgs != null) {
+      PApplet.main(concat(appletArgs, passedArgs));
+    } else {
+      PApplet.main(appletArgs);
+    }
   }
 }
