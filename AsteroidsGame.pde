@@ -1,7 +1,8 @@
 //your variable declarations here
+public boolean touch = false;
 SpaceShip xWing = new SpaceShip();
 Star[] galaxy = new Star[200];
-Asteroid[] field = new Asteroid[15];
+ArrayList <Asteroid> field = new ArrayList <Asteroid>();
 boolean wIsPressed, aIsPressed, dIsPressed, sIsPressed;
 public void setup() 
 {
@@ -10,9 +11,9 @@ public void setup()
   {
     galaxy[i] = new Star();
   }
-  for(int i = 0;i<field.length;i++)
+  for(int i = 0;i<=15;i++)
   {
-    field[i] = new Asteroid();
+    field.add(i, new Asteroid());
   }
 }
 public void draw() 
@@ -22,10 +23,16 @@ public void draw()
   {
     galaxy[i].show();
   }
-  for(int i = 0;i<field.length;i++)
+  for(int i = 0;i<field.size();i++)
   {
-    field[i].show();
-    field[i].move();
+    field.get(i).show();
+    field.get(i).move();
+    field.get(i).isTouching(); 
+    if(touch == true)
+    {
+      field.remove(i);
+      touch = false;
+    }
   }
   xWing.show();
   if(wIsPressed == true) {xWing.accelerate(.2);}
@@ -187,7 +194,7 @@ class Star
 }
 class Asteroid extends Floater
 {
-  int rotSpeed;
+  private int rotSpeed;
   public Asteroid()
   {
     corners = 6;
@@ -207,6 +214,11 @@ class Asteroid extends Floater
   {
     rotate(rotSpeed);
     super.move();
+  }
+  public boolean isTouching()
+  {
+    if ((dist((float)myCenterX,(float)myCenterY, (float)xWing.getX(), (float)xWing.getY())) < 20) {return touch = true;}
+    else {return touch;}
   }
   public void setX(int x) {myCenterX = x;}
   public int getX() {return (int)myCenterX;}
