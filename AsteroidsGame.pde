@@ -1,9 +1,12 @@
 //your variable declarations here
 public boolean touch = false;
+public int bulletCount = 0;
+public boolean left =true;
 SpaceShip xWing = new SpaceShip();
-Star[] galaxy = new Star[200];
+Star[] galaxy = new Star[500];
 ArrayList <Asteroid> field = new ArrayList <Asteroid>();
-boolean wIsPressed, aIsPressed, dIsPressed, sIsPressed;
+ArrayList <Bullet> bang = new ArrayList <Bullet>();
+boolean wIsPressed, aIsPressed, dIsPressed, sIsPressed, spaceIsPressed;
 public void setup() 
 {
   size(700,700);
@@ -19,6 +22,24 @@ public void setup()
 public void draw() 
 {
   background(0);
+  if(spaceIsPressed == true && bulletCount<25)
+  {
+    bang.add(new Bullet(xWing));
+    bulletCount++;
+  }
+  for(int i = 0;i<bang.size();i++) 
+  {
+    bang.get(i).show();
+    bang.get(i).move();
+    if(((bang.get(i).getX()) > 700) || ((bang.get(i).getX() < 0))) {
+      bang.remove(i);
+      bulletCount--;
+    }
+    else if(((bang.get(i).getY()) > 700) || ((bang.get(i).getY() < 0))) {
+      bang.remove(i);
+      bulletCount--;
+    }
+  }
   for(int i = 0;i<galaxy.length;i++)
   {
     galaxy[i].show();
@@ -27,11 +48,23 @@ public void draw()
   {
     field.get(i).show();
     field.get(i).move();
-    field.get(i).isTouching(); 
+    field.get(i).isTouchingShip(); 
     if(touch == true)
     {
       field.remove(i);
       touch = false;
+      break;
+    }
+    for(int z = 0; z<bang.size();z++)
+    {
+      //checking to see if the bullets are touching the asteroids
+      if((dist((float)field.get(i).getX(),(float)field.get(i).getY(), (float)bang.get(z).getX(), (float)bang.get(z).getY())) < 5)
+      { 
+        field.remove(i);
+        bang.remove(z);
+        bulletCount--;
+        break;
+      }
     }
   }
   xWing.show();
@@ -43,6 +76,7 @@ public void draw()
 }
 public void keyPressed()
 {
+  if(key == ' ') {spaceIsPressed = true;}
   if(key == 'w') {wIsPressed = true;}//go forward
   if(key == 'a') {aIsPressed = true;}//turn left
   if(key == 'd') {dIsPressed = true;}//turn right
@@ -57,28 +91,60 @@ public void keyPressed()
 }
 public void keyReleased()
 {
+  if(key == ' ') {spaceIsPressed = false;}
   if(key == 'w') {wIsPressed = false;}//go forward
   if(key == 'a') {aIsPressed = false;}//turn left
   if(key == 'd') {dIsPressed = false;}//turn right
   if(key == 's') {sIsPressed = false;}
 }
+class Bullet extends Floater
+{
+  public Bullet(SpaceShip nutella)
+  {
+    myCenterX = nutella.myCenterX;
+    myPointDirection = nutella.myPointDirection;
+    double dRadians = myPointDirection*(Math.PI/180);
+    // if(left == true) {
+    //   myCenterX = (nutella.myCenterX-dRadians);
+    //   left = !left;
+    // }
+    // else if(left ==false) {
+    //   myCenterX = (nutella.myCenterX+dRadians);
+    //   left = !left;
+    // }
+    myCenterY = nutella.myCenterY;
+    myDirectionX = 5*Math.cos(dRadians)+nutella.myDirectionX;
+    myDirectionY = 5*Math.sin(dRadians)+nutella.myDirectionY;
+  }
+  public void move()
+  {    
+    myCenterX += myDirectionX;    
+    myCenterY += myDirectionY;   
+  }
+  public void show()
+  {
+    noFill();
+    stroke(130);
+    ellipse((float)myCenterX, (float)myCenterY,(float)5,(float)5);
+  }
+  public void setX(int x) {myCenterX = x;}
+  public int getX() {return (int)myCenterX;}
+  public void setY(int y) {myCenterY = y;}  
+  public int getY() {return (int)myCenterY;}  
+  public void setDirectionX(double x) {myDirectionX = x;}  
+  public double getDirectionX() {return myDirectionX;}  
+  public void setDirectionY(double y) {myDirectionY = y;}  
+  public double getDirectionY() {return myDirectionY;}   
+  public void setPointDirection(int degrees) {myPointDirection = degrees;}   
+  public double getPointDirection() {return myPointDirection;} 
+}
 class SpaceShip extends Floater  
 {   
     public SpaceShip()
     {
-      // corners = 3;//draw the ship
-      // xCorners = new int [corners];
-      // yCorners = new int [corners];
-      // xCorners[0]=16;
-      // yCorners[0]=0;
-      // xCorners[1]=-8;
-      // yCorners[1]=-8;
-      // xCorners[2]=-8;
-      // yCorners[2]=8;
-      
       int[] xS = {16, 8, 13, 13, 7, 0, -6, -6, -10, -10, -6, -3, -6, -10, -10, -6, -6,  0, 7, 13, 13, 8, 16};
       int[] yS = {0, 5, 5, 6, 6, 10, 15, 10, 9, 6, 5, 0, -5, -6, -9, -10, -15, -10, -6, -6, -5, -5, 0};
-      corners = xS.length;//give the fighter WINGS on monday
+      corners = xS.length;
       xCorners = xS;
       yCorners = yS;
 
@@ -180,7 +246,7 @@ abstract class Floater //Do NOT modify the Floater class! Make changes in the Sp
 class Star
 {
   private int starX, starY;
-  Star()
+  public Star()
   {
     starX = (int)(Math.random()*700);
     starY = (int)(Math.random()*700);
@@ -189,7 +255,7 @@ class Star
   {
     fill(255);
     noStroke();
-    ellipse(starX, starY, 2, 2);
+    ellipse(starX, starY, 1, 1);
   }
 }
 class Asteroid extends Floater
@@ -215,7 +281,7 @@ class Asteroid extends Floater
     rotate(rotSpeed);
     super.move();
   }
-  public boolean isTouching()
+  public boolean isTouchingShip()
   {
     if ((dist((float)myCenterX,(float)myCenterY, (float)xWing.getX(), (float)xWing.getY())) < 20) {return touch = true;}
     else {return touch;}
