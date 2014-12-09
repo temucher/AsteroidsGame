@@ -20,4 +20,6 @@ footer {
 	font-style: italic;
 	font-size: 90%;
 }
-
+#controls {
+    float: left;
+}
